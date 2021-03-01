@@ -48,10 +48,10 @@ def get_drep_or_galah_only_cluster_dict(drep_cluster_table,drep_RG,galah_cluster
             return cluster
 
     if show_drep:
-        print('dRep:')
+        print('dRep_only:')
         pprint.pprint(mkdict(drep_RG,galah_RG,drep_cluster_table))
     if show_galah:
-        print('galah:')
+        print('galah_only:')
         pprint.pprint(mkdict(galah_RG,drep_RG,galah_cluster_table))
 
 def get_intersection_cluster_dict_of_drep_or_galah(drep_cluster_table,drep_RG,galah_cluster_table,galah_RG,show_inter_cluster_drep=False,show_inter_cluster_galah=False,show_diff_of_inter=False):
@@ -97,15 +97,16 @@ def get_intersection_cluster_dict_of_drep_or_galah(drep_cluster_table,drep_RG,ga
         return inter_cluster_galah
     
     if show_inter_cluster_drep:
-        print('dRep:')
+        print('dRep_inter:')
         pprint.pprint(mkdict_drep(drep_RG,galah_RG,drep_cluster_table))
     if show_inter_cluster_galah:
-        print('galah:')
+        print('galah_inter:')
         pprint.pprint(mkdict_galah(galah_RG,drep_RG,galah_cluster_table))
     if show_diff_of_inter:
         inter=[i for i in drep_RG if i in galah_RG]
         inter_cluster_drep=mkdict_drep(drep_RG,galah_RG,drep_cluster_table)
         inter_cluster_galah=mkdict_galah(galah_RG,drep_RG,galah_cluster_table)
+        print('difference between clusters of intersections')
         pprint.pprint([('*',k,'<dRep>:',inter_cluster_drep[k],'<galah>:',inter_cluster_galah[k]) for k in inter if sorted(inter_cluster_drep[k]) != sorted(inter_cluster_galah[k])])
         print('**************')
 
@@ -129,6 +130,7 @@ def main():
             get_drep_or_galah_only_cluster_dict(a1,a2,b1,b2,show_drep=True,show_galah=True)
             print('**************')
             get_intersection_cluster_dict_of_drep_or_galah(a1,a2,b1,b2,show_inter_cluster_drep=False,show_inter_cluster_galah=False,show_diff_of_inter=True)
+            print('**************')
     plt.ioff()
     plt.show()
 if __name__=='__main__':
