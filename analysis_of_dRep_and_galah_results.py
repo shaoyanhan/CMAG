@@ -136,7 +136,7 @@ def get_intersection_cluster_dict_of_drep_or_galah(drep_cluster_table,drep_RG,ga
         return returns
 
     
-def taxonomy_verification(taxon_table,diff=None,same=None):
+def taxonomy_verification(taxon_table,diff=None,same=None,check_cluster_replication=False):
     def taxon_diff(taxon_table,diff):
         same_taxon={}
         diff_taxon={}
@@ -197,6 +197,14 @@ def taxonomy_verification(taxon_table,diff=None,same=None):
         print('-------------')
         print('<different species>')
         pprint.pprint(diff_taxon)
+    if check_cluster_replication:
+        same_taxon=taxon_same(taxon_table,same)[0]
+        taxon=[]
+        for i in same_taxon:
+            taxon.append(same_taxon[i]['same species'][0])
+        print('-------------')
+#         print(taxon)
+        print('There are no replicate species between these clusters') if len(taxon)==len(set(taxon)) else 'There are some replicate species between these clusters'
         
         
         
@@ -224,7 +232,7 @@ def main():
 #             print('**************')
             same=get_intersection_cluster_dict_of_drep_or_galah(a1,a2,b1,b2,return_galah=True)[0]
             diff=get_intersection_cluster_dict_of_drep_or_galah(a1,a2,b1,b2,return_diff=True)
-            taxonomy_verification(c,same=same)
+            taxonomy_verification(c,same=same,check_cluster_replication=True)
             print('**************\n')
     plt.ioff()
     plt.show()
