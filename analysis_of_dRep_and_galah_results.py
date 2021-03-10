@@ -136,7 +136,7 @@ def get_intersection_cluster_dict_of_drep_or_galah(drep_cluster_table,drep_RG,ga
         inter_cluster_galah=mkdict_galah(galah_RG,drep_RG,galah_cluster_table)
         if return_diff_or_same=='diff':
             return [(k,inter_cluster_drep[k],inter_cluster_galah[k]) for k in inter if sorted(inter_cluster_drep[k]) != sorted(inter_cluster_galah[k])]
-        if return_diff_or_same=='same':
+        elif return_diff_or_same=='same':
             dict_list=[{k:inter_cluster_drep[k]} for k in inter if sorted(inter_cluster_drep[k]) == sorted(inter_cluster_galah[k])]
             result=dict_list.pop()
             for i in range(len(dict_list)):
@@ -148,7 +148,7 @@ def get_intersection_cluster_dict_of_drep_or_galah(drep_cluster_table,drep_RG,ga
         return returns
 
     
-def taxonomy_verification(taxon_table,diff=None,same=None,show_diff=False,show_same=False,check_cluster_replication=False):
+def taxonomy_verification(taxon_table,diff=None,same=None,show_diff=None,show_same=None,check_cluster_replication=False):
     def taxon_diff(taxon_table,diff):
         same_taxon={}
         diff_taxon={}
@@ -174,49 +174,139 @@ def taxonomy_verification(taxon_table,diff=None,same=None,show_diff=False,show_s
         return same_taxon,diff_taxon
 
     def taxon_same(taxon_table,same):
-        same_taxon={}
+        same_taxon_single={}
+        same_taxon_multi={}
         diff_taxon={}
+        single_RG_count=0
         for i in same.keys():
-#             if len(same[i])>1:
-            taxon=[]
-            for j in same[i]:
-                taxon.append(taxon_table['GTDB classification'][list(taxon_table['user_genome']).index(j)])
-            if len(list(set(taxon)))==1:
+            if len(same[i])==1:
+                taxon=[]
+                taxon.append(taxon_table['GTDB classification'][list(taxon_table['user_genome']).index(i)])
                 result={}
                 result['RG']=i
-                result['same species']=list(set(taxon))
-                result['members']=same[i]
-                same_taxon[f'result{len(same_taxon)+1}']=result
+                result['species']=taxon
+                result['member']=i
+                same_taxon_single[f'result{len(same_taxon_single)+1}']=result
+                single_RG_count=single_RG_count+1
             else:
-                result={}
-                result['RG']=i
-                result['each\'s species']=taxon
-                result['dRep']=same[i]
-                diff_taxon[f'result{len(diff_taxon)+1}']=result
-        return same_taxon,diff_taxon
+                taxon=[]
+                for j in same[i]:
+                    taxon.append(taxon_table['GTDB classification'][list(taxon_table['user_genome']).index(j)])
+                if len(list(set(taxon)))==1:
+                    result={}
+                    result['RG']=i
+                    result['species']=list(set(taxon))
+                    result['members']=same[i]
+                    same_taxon_multi[f'result{len(same_taxon_multi)+1}']=result
+                else:
+                    result={}
+                    result['RG']=i
+                    result['each\'s species']=taxon
+                    result['dRep']=same[i]
+                    diff_taxon[f'result{len(diff_taxon)+1}']=result
+        return same_taxon_single,same_taxon_multi,single_RG_count,diff_taxon
     
     if show_diff:
         same_taxon,diff_taxon=taxon_diff(taxon_table,diff)
-        print(f'<same species>: total= {len(same_taxon)} results')
-        pprint.pprint(same_taxon)
-        print('-------------')
-        print(f'<different species>: total= {len(diff_taxon)} results')
-        pprint.pprint(diff_taxon)
+        if show_diff=='only_stat':
+            print('-------------')
+            print(f'| S |  There are total {len(same_taxon)+len(diff_taxon)} results below:')
+            print(f'| T |  Cluster\'s members from same species: {len(same_taxon)}; ')
+            print(f'| A |  Cluster\'s members from different species: {len(diff_taxon)}; ')
+            print('| T |')
+        if show_diff=='all':
+            print('-------------')
+            print(f'<same species>: total= {len(same_taxon)} results')
+            pprint.pprint(same_taxon)
+            print('-------------')
+            print(f'<different species>: total= {len(diff_taxon)} results')
+            pprint.pprint(diff_taxon)
+        
     if show_same:
-        same_taxon,diff_taxon=taxon_same(taxon_table,same)
-        print(f'<same species>: total= {len(same_taxon)} results')
-        pprint.pprint(same_taxon)
+        same_taxon_single,same_taxon_multi,single_RG_count,diff_taxon=taxon_same(taxon_table,same)
         print('-------------')
-        print(f'<different species>: total= {len(diff_taxon)} results')
-        pprint.pprint(diff_taxon)
-    if check_cluster_replication:
-        same_taxon=taxon_same(taxon_table,same)[0]
-        taxon=[]
+        print(f'｜ S |  There are total {single_RG_count+len(same_taxon_multi)+len(diff_taxon)} results below:')
+        print(f'｜ T |  Cluster with only one member: {single_RG_count}; ')
+        print(f'｜ A |  Cluster with at least two members and are from same species: {len(same_taxon_multi)}; ')
+        print(f'｜ T |  Cluster\'s members from different species: {len(diff_taxon)}; ')
+        print('-------------')
+        if show_same=='simple':
+            print(f'Omitting {single_RG_count} results of one member clusters')
+            print('-------------')
+            print(f'<same species>: total= {len(same_taxon_multi)} results')
+            pprint.pprint(same_taxon_multi)
+            print('-------------')
+            print(f'<different species>: total= {len(diff_taxon)} results')
+            pprint.pprint(diff_taxon)
+        elif show_same=='all':
+            print(f'<one member>: total= {single_RG_count} results')
+            pprint.pprint(same_taxon_single)
+            print('-------------')
+            print(f'<same species>: total= {len(same_taxon_multi)} results')
+            pprint.pprint(same_taxon_multi)
+            print('-------------')
+            print(f'<different species>: total= {len(diff_taxon)} results')
+            pprint.pprint(diff_taxon)         
+        else:
+            print('Please select \'simple\' or \'all\' mode to print results')
+            
+    def species_point_to_result_dict(same_taxon):
+        species_point_to_result={}
+        replication_count=0
         for i in same_taxon:
-            taxon.append(same_taxon[i]['same species'][0])
+            species_name=same_taxon[i]['species'][0]
+            if species_name in species_point_to_result:
+                species_point_to_result[species_name].append(i)
+                replication_count=replication_count+1
+            else:
+                species_point_to_result[species_name]=[i]
+        return species_point_to_result,replication_count
+            
+    def replication_result_dict(same_taxon,species_point_to_result):
+        replication_result={}
+        for i in species_point_to_result:
+            per_species_result=species_point_to_result[i]
+            if len(per_species_result)>1:
+                result={}
+                result['result count']=len(per_species_result)
+                result['result number of <one member> or <same species>']=per_species_result
+                result['RG']=[]
+                for j in per_species_result:
+                    result['RG'].append(same_taxon[j]['RG'])
+                result['species']=i
+                replication_result[f'result{len(replication_result)+1}']=result
+        return replication_result
+    
+    if check_cluster_replication:
+        same_taxon_single,same_taxon_multi=taxon_same(taxon_table,same)[0:2]
+        species_point_to_result_single,replication_count_single=species_point_to_result_dict(same_taxon_single)
+        species_point_to_result_multi,replication_count_multi=species_point_to_result_dict(same_taxon_multi)
+#         print(species_point_to_result_single,replication_count_single)
+#         print('-------------')
+#         print(species_point_to_result_multi,replication_count_multi)
+        if replication_count_single>0:
+            replication_result_single=replication_result_dict(same_taxon_single,species_point_to_result_single)
+        if replication_count_multi>0:
+            replication_result_multi=replication_result_dict(same_taxon_multi,species_point_to_result_multi)
         print('-------------')
-#         print(taxon)
-        print('There are no replicate species between <same species> clusters') if len(taxon)==len(set(taxon)) else print('There are some replicate species between <same species> clusters')
+        print('<check results>')
+        if replication_count_single>0 and replication_count_multi==0:
+            print(f'There are total {len(replication_result_single)} replicate species between the set of <one member> clusters!')
+            print(f'There are no replicate species between the set of <same species> clusters!')
+            pprint.pprint(replication_result_single)
+        elif replication_count_single==0 and replication_count_multi>0:
+            print(f'There are no replicate species between the set of <one member> clusters!')
+            print(f'There are total {len(replication_result_multi)} replicate species between the set of <same species> clusters!')
+            pprint.pprint(replication_result_multi)
+        elif replication_count_single>0 and replication_count_multi>0:
+            print(f'There are total {len(replication_result_single)} and {len(replication_result_multi)} replicate species between the set of <one member> and <same species> clusters!')
+            print(f'<one member>: {len(replication_result_single)} results')
+            pprint.pprint(replication_result_single)
+            print('-------------')
+            print(f'<same species>: {len(replication_result_multi)} results')
+            pprint.pprint(replication_result_multi)
+        else:
+            print('There are no replicate species between all same species clusters.')
         
         
         
@@ -254,10 +344,16 @@ def main():
 #     path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools.tsv'
 #     path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI95/dereplicated_genomes'
 #     path_to_taxon_table=f'/zfssz3/ST_META/ST_META_CD/PROJECT/P18Z10200N0127_ZJ/vagina/vagina_mag/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
-    path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/drep/data_tables/Cdb.csv'
-    path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/galah/cluster-definition.tsv'
-    path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/drep/dereplicated_genomes'
-    path_to_taxon_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/cluster_mag_dastools_as_mt_qh.taxonmy.tsv'
+
+#     path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/drep/data_tables/Cdb.csv'
+#     path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/galah/cluster-definition.tsv'
+#     path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/drep/dereplicated_genomes'
+#     path_to_taxon_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/cluster_mag_dastools_as_mt_qh.taxonmy.tsv'
+
+    path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI99/data_tables/Cdb.csv'
+    path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/galah_ani99/cluster-definition.tsv'
+    path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI99/dereplicated_genomes'
+    path_to_taxon_table=f'/zfssz3/ST_META/ST_META_CD/PROJECT/P18Z10200N0127_ZJ/vagina/vagina_mag/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
     a1,a2=read_in_drep_cluster_table(path_to_drep_cluster_table,path_to_drep_RG_dir)
     b1,b2=read_in_galah_cluster_table(path_to_galah_cluster_table)
     c=read_in_taxon_table(path_to_taxon_table)
@@ -265,14 +361,14 @@ def main():
     venn_plot_of_RG(a2,b2)
     plt.ioff()
     plt.show()
-#     print('**************')
+    print('**************')
 #     get_drep_or_galah_only_cluster_dict(a1,a2,b1,b2,show_drep=True,show_galah=True)
 #     print('**************')
 #     get_intersection_cluster_dict_of_drep_or_galah(a1,a2,b1,b2,show_inter_cluster_drep=False,show_inter_cluster_galah=False,show_diff_of_inter=True)
 #     print('**************')
     same=get_intersection_cluster_dict_of_drep_or_galah(a1,a2,b1,b2,return_diff_or_same='same')
     diff=get_intersection_cluster_dict_of_drep_or_galah(a1,a2,b1,b2,return_diff_or_same='diff')
-    taxonomy_verification(c,diff,same,show_diff=True,show_same=True,check_cluster_replication=True)
+    taxonomy_verification(c,diff,same,show_diff='all',show_same='simple',check_cluster_replication=True)
     
 if __name__=='__main__':
     main()
