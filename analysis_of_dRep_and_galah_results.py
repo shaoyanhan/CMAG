@@ -208,12 +208,11 @@ def taxonomy_verification(taxon_table,diff=None,same=None,show_diff=None,show_sa
     
     if show_diff:
         same_taxon,diff_taxon=taxon_diff(taxon_table,diff)
-        if show_diff=='only_stat':
-            print('-------------')
-            print(f'| S |  There are total {len(same_taxon)+len(diff_taxon)} results below:')
-            print(f'| T |  Cluster\'s members from same species: {len(same_taxon)}; ')
-            print(f'| A |  Cluster\'s members from different species: {len(diff_taxon)}; ')
-            print('| T |')
+        print('-------------')
+        print(f'| S |  There are total {len(same_taxon)+len(diff_taxon)} results below:')
+        print(f'| T |  Cluster\'s members from same species: {len(same_taxon)}; ')
+        print(f'| A |  Cluster\'s members from different species: {len(diff_taxon)}; ')
+        print('| T |')
         if show_diff=='all':
             print('-------------')
             print(f'<same species>: total= {len(same_taxon)} results')
@@ -339,21 +338,31 @@ def main():
 #     plt.ioff()
 #     plt.show()
 
+#CAMI
+#     path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/metapiin_temp/results/10.dereplicate/mags/hmq.bins.metaspades.dastools.drep.out/data_tables/Cdb.csv'
+#     path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/metapiin_temp/results/10.dereplicate_galah/metaspades_dastools/output-cluster-definition.tsv'
+#     path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/metapiin_temp/results/10.dereplicate/mags/hmq.bins.metaspades.dastools.drep.out/dereplicated_genomes'
+#     path_to_taxon_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/metapiin_temp/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
 
+#ANI95
 #     path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI95/data_tables/Cdb.csv'
 #     path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools.tsv'
 #     path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI95/dereplicated_genomes'
 #     path_to_taxon_table=f'/zfssz3/ST_META/ST_META_CD/PROJECT/P18Z10200N0127_ZJ/vagina/vagina_mag/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
 
+#as_mt_qh
 #     path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/drep/data_tables/Cdb.csv'
 #     path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/galah/cluster-definition.tsv'
 #     path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/drep/dereplicated_genomes'
 #     path_to_taxon_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/cluster_mag_dastools_as_mt_qh.taxonmy.tsv'
 
+# ANI99
     path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI99/data_tables/Cdb.csv'
     path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/galah_ani99/cluster-definition.tsv'
     path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI99/dereplicated_genomes'
     path_to_taxon_table=f'/zfssz3/ST_META/ST_META_CD/PROJECT/P18Z10200N0127_ZJ/vagina/vagina_mag/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
+
+
     a1,a2=read_in_drep_cluster_table(path_to_drep_cluster_table,path_to_drep_RG_dir)
     b1,b2=read_in_galah_cluster_table(path_to_galah_cluster_table)
     c=read_in_taxon_table(path_to_taxon_table)
