@@ -3,6 +3,7 @@ import os, sys
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2
 import pprint
+import pickle
 
 def read_in_drep_cluster_table(path_to_drep_cluster_table,path_to_drep_RG_dir):
     drep_RG=[]
@@ -148,7 +149,7 @@ def get_intersection_cluster_dict_of_drep_or_galah(drep_cluster_table,drep_RG,ga
         return returns
 
     
-def taxonomy_verification(taxon_table,diff=None,same=None,show_diff=None,show_same=None,check_cluster_replication=False):
+def taxonomy_verification(taxon_table,diff=None,same=None,show_diff=None,show_same=None,check_cluster_replication=False,write_to_file=None):
     def taxon_diff(taxon_table,diff):
         same_taxon={}
         diff_taxon={}
@@ -307,7 +308,17 @@ def taxonomy_verification(taxon_table,diff=None,same=None,show_diff=None,show_sa
         else:
             print('There are no replicate species between all same species clusters.')
         
-        
+    if write_to_file:
+        if write_to_file=='CC_and_PC':
+            same_taxon=taxon_diff(taxon_table,diff)[0]
+            same_taxon_multi=taxon_same(taxon_table,same)[1]
+            with open('candidate_cluster.pkl','wb') as f:
+                pickle.dump(same_taxon,f)
+            with open('perfect_cluster.pkl','wb') as f:
+                pickle.dump(same_taxon_multi,f)
+            print('Candidate and perfect cluster were already written to files: candidate_cluster.pkl perfect_cluster.pkl!')
+        else:
+            print("Please input option to write files!")
         
 def main():
 #     assembler_name=['megahit','metaspades']
@@ -345,10 +356,10 @@ def main():
 #     path_to_taxon_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/metapiin_temp/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
 
 #ANI95
-#     path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI95/data_tables/Cdb.csv'
-#     path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools.tsv'
-#     path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI95/dereplicated_genomes'
-#     path_to_taxon_table=f'/zfssz3/ST_META/ST_META_CD/PROJECT/P18Z10200N0127_ZJ/vagina/vagina_mag/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
+    path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI95/data_tables/Cdb.csv'
+    path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools.tsv'
+    path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI95/dereplicated_genomes'
+    path_to_taxon_table=f'/zfssz3/ST_META/ST_META_CD/PROJECT/P18Z10200N0127_ZJ/vagina/vagina_mag/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
 
 #as_mt_qh
 #     path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/drep/data_tables/Cdb.csv'
@@ -357,10 +368,10 @@ def main():
 #     path_to_taxon_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_as_mt_qh_drep_galah/cluster_mag_dastools_as_mt_qh.taxonmy.tsv'
 
 # ANI99
-    path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI99/data_tables/Cdb.csv'
-    path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/galah_ani99/cluster-definition.tsv'
-    path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI99/dereplicated_genomes'
-    path_to_taxon_table=f'/zfssz3/ST_META/ST_META_CD/PROJECT/P18Z10200N0127_ZJ/vagina/vagina_mag/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
+#     path_to_drep_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI99/data_tables/Cdb.csv'
+#     path_to_galah_cluster_table=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/galah_ani99/cluster-definition.tsv'
+#     path_to_drep_RG_dir=f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag_analysis/assay/cluster/cluster_mag_dastools_drep/ANI99/dereplicated_genomes'
+#     path_to_taxon_table=f'/zfssz3/ST_META/ST_META_CD/PROJECT/P18Z10200N0127_ZJ/vagina/vagina_mag/results/09.classify/report/bins_hmq.metaspades.dastools.gtdbtk.all.tsv'
 
 
     a1,a2=read_in_drep_cluster_table(path_to_drep_cluster_table,path_to_drep_RG_dir)
@@ -377,7 +388,7 @@ def main():
 #     print('**************')
     same=get_intersection_cluster_dict_of_drep_or_galah(a1,a2,b1,b2,return_diff_or_same='same')
     diff=get_intersection_cluster_dict_of_drep_or_galah(a1,a2,b1,b2,return_diff_or_same='diff')
-    taxonomy_verification(c,diff,same,show_diff='all',show_same='simple',check_cluster_replication=True)
+    taxonomy_verification(c,diff,same,show_diff=True,show_same=True,check_cluster_replication=False,write_to_file='CC_and_PC')
     
 if __name__=='__main__':
     main()
