@@ -197,9 +197,9 @@ def main():
     cluster_dict=get_cluster_dict(path_to_drep_cluster_table)
     pprint.pprint(cluster_dict)
     check_subcluster_animf99(cluster_dict)
-    make_RG_statistical_file(path_to_drep_RG_dir,cluster_dict)
     subcluster_flye_assembling_and_checkm_checking(cluster_dict)
-    
+    make_RG_statistical_file(path_to_drep_RG_dir,cluster_dict)
+    os.system("mv RG_stat.csv ./flye/")
 if __name__=='__main__':
     main()
     
