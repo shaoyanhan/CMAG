@@ -18,7 +18,37 @@ def get_mag_multicopy_info_dict(mag_list,gene_copy_type,path_to_checkm_ext_file,
         print("mag_multicopy_info:\n")
         pprint.pprint(mag_multicopy_info)
     return mag_multicopy_info
+#The mag_multicopy_info_dict is look like:
+# mag_multicopy_info:
 
+# {'3HX0022.metaspades.metabat2_graphbin_dastools.bin.13': {'GCN2': ['PF01396',
+#                                                                    'PF00276'],
+#                                                           'GCN3': [''],
+#                                                           'GCN4': [''],
+#                                                           'GCN5+': ['']},
+#  '3HX0029.metaspades.maxbin2_graphbin_dastools.bin.17': {'GCN2': ['PF03412'],
+#                                                          'GCN3': [''],
+#                                                          'GCN4': [''],
+#                                                          'GCN5+': ['']},
+#  '3HX0257.metaspades.concoct_graphbin_dastools.bin.3': {'GCN2': ['PF01396'],
+#                                                         'GCN3': [''],
+#                                                         'GCN4': [''],
+#                                                         'GCN5+': ['']},
+#  '3HX0290.metaspades.maxbin2_graphbin_dastools.bin.9': {'GCN2': [''],
+#                                                         'GCN3': [''],
+#                                                         'GCN4': [''],
+#                                                         'GCN5+': ['']},
+#  '3HX0296.metaspades.metabat2_graphbin_dastools.bin.17_sub': {'GCN2': ['PF02361',
+#                                                                        'PF02590',
+#                                                                        'PF02463'],
+#                                                               'GCN3': [''],
+#                                                               'GCN4': [''],
+#                                                               'GCN5+': ['']},
+#  '3HX0451.metaspades.maxbin2_graphbin_dastools.bin.21': {'GCN2': ['PF04011',
+#                                                                   'TIGR00482'],
+#                                                          'GCN3': [''],
+#                                                          'GCN4': [''],
+#                                                          'GCN5+': ['']}}
 
 
 def read_in_mag_file(mag_name,mag_suffix,path_to_mag_folder):
@@ -52,6 +82,11 @@ def append_contig_to_seq_interval_dict(cut_seq_info,hmm_result):#{'NODE_697_leng
     else:
         cut_seq_info[contig_name]=seq_interval
     return cut_seq_info
+#The cut_seq_info is look like:
+# {'NODE_604_length_10964_cov_2.766235': [[8502, 9059]],
+#  'NODE_499_length_13456_cov_2.127439': [[6020, 6361]]}
+#The number in the list is the contamination interval of this contig
+
 
 def find_min_max(internal1,internal2):#[4,6],[3,5] => [3,6]
     internal1.extend(internal2)
@@ -78,6 +113,8 @@ def merge_overlap(internal_array):#[[4,7],[1,2],[3,5],[1,3],[8,10]] => [[1,7],[8
             if change==0:
                 break
         merged_interval.append(internal1)
+        
+    #Bubble sort
     for i in range(len(merged_interval)-1):#[[8,10],[4,5],[1,2]] => [[1,2],[4,5],[8,10]]
         for j in range(len(merged_interval)-i-1):
             if merged_interval[j][0]>merged_interval[j+1][0]:
@@ -126,7 +163,30 @@ def do_cutting(raw_contigs,cut_seq_info):# raw_contigs: {'NODE_1_length_78_cov_1
             print('\n----------\n')
     print("\n***Cutting process finished!***\n")
     return raw_contigs
-    
+#The cutting process's output during running is look like:
+# ***Starting cutting process ...***
+
+# The contig NODE_604_length_10964_cov_2.766235 was split to 2 segments. Interval list of this contig's contaminations: [[8502, 9059]]
+
+# ----------
+
+# The contig NODE_9171_length_1093_cov_4.129921 was highly contaminated and thrown away! Interval list of this contig's contaminations: [[3, 1091]]
+
+# ----------
+
+# The contig NODE_499_length_13456_cov_2.127439 was split to 2 segments. Interval list of this contig's contaminations: [[6020, 6361]]
+
+
+# ***Cutting process finished!***
+
+# Cutted contigs were written to file: ./cutted_mag/3HX0451.metaspades.maxbin2_graphbin_dastools.bin.21_cutted.fa !
+# Contamination cutting with 3HX0451.metaspades.maxbin2_graphbin_dastools.bin.21 finished!
+
+# Running time:  0:00:03.716863
+# ----------
+
+
+
 def write_in_cutted_mag(cutted_contigs,mag_name,path_to_save_the_cutted_mag,mag_suffix):
     if os.system(f'ls {path_to_save_the_cutted_mag}'):
         os.system(f'mkdir -p {path_to_save_the_cutted_mag}')
