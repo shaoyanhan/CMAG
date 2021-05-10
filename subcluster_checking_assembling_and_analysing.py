@@ -21,7 +21,7 @@ def get_cluster_dict(path_to_drep_cluster_table):
     print(f'Total left {len(cluster_dict)} clusters')
     return cluster_dict
 
-def check_subcluster_animf99(cluster_dict):
+def check_subcluster_animf99(cluster_dict,path_to_checkm_result,path_to_mag):
     if cluster_dict:
         failed_count=0
         for cluster in cluster_dict:
@@ -29,26 +29,23 @@ def check_subcluster_animf99(cluster_dict):
 
             with open('./drep/sample_hmq.tsv','w') as f:
                 for sample in cluster_dict[cluster]:
-                    sample_id=sample.split('.')[0]
-                    f.writelines(f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag/results/06.binning/bins/{sample_id}.metaspades.out/dastools/{sample}\n')
-
-            os.system("echo \"genome completeness contamination strain_heterogeneity N50 contig_number contig_length_sum contig_length_max\" > ./drep/sample_stat.csv;\
-                for i in $(cat ./drep/sample_hmq.tsv | cut -d \"/\" -f13);\
-                do grep $i /hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/flye_test/bins_hmq.metaspades.dastools.gtdbtk.all.tsv \
-                | awk '{print $1,$(NF-11),$(NF-10),$(NF-9),$NF,$(NF-5),$(NF-4),$(NF-2)}';done >> ./drep/sample_stat.csv;\
-                sed -i 's/ /,/g' ./drep/sample_stat.csv")
+                    f.writelines(f'{path_to_mag}/{sample}\n')
+                    
+            os.system('echo "genome,completeness,contamination,strain_heterogeneity" > ./drep/sample_stat.csv;sed "s/\t/,/g" %s > checkm;\
+                for i in $(cat ./drep/sample_hmq.tsv | awk -F "/" \'{print $NF}\' | sed "s/.fa//g");do grep "$i," checkm \
+                | awk -F "," \'{print $1".fa",$12,$13,$14}\' | sed "s/ /,/g";done >> ./drep/sample_stat.csv;rm checkm' % (path_to_checkm_result))
 
             with open('./drep/drep.sh','w') as f:
                 f.write("#!/bin/bash\n\
                     dRep dereplicate \\\n\
                     ./ \\\n\
-                    --processors 32 \\\n\
+                    --processors 20 \\\n\
                     --length 50000 \\\n\
                     --completeness 75 \\\n\
                     --contamination 25 \\\n\
                     --genomes sample_hmq.tsv \\\n\
                     --genomeInfo sample_stat.csv \\\n\
-                    --S_algorithm ANImf \\\n\
+                    --S_algorithm fastANI \\\n\
                     --P_ani 0.9 \\\n\
                     --S_ani 0.99 \\\n\
                     --cov_thresh 0.1 \\\n\
@@ -60,7 +57,7 @@ def check_subcluster_animf99(cluster_dict):
             for words in text:
                 sys.stdout.write(words)
                 sys.stdout.flush()
-                time.sleep(0.3)
+                time.sleep(0.01)
 
             start=datetime.datetime.now()
             while os.system("cd drep/;bash drep.sh")==0:
@@ -95,13 +92,13 @@ def check_subcluster_animf99(cluster_dict):
             print("----------\n")
 
         if failed_count:
-            print(f'All checking process finished, {failed_count} clusters failed. Checking drep.log and failed_cluster.log for more details.')
+            print(f'All checking process finished, {failed_count} clusters failed. Checking all_drep.log and failed_cluster.log for more details.')
         else:
-            print("All checking process finished, all clusters passed. Checking drep.log for more details.")
+            print("All checking process finished, all clusters passed. Checking all_drep.log for more details.")
     else:
         print("Checking process failed! There are no clusters with at least 2 members in the cluster_dict!")
 
-def make_RG_statistical_file(path_to_drep_RG_dir,cluster_dict):
+def make_RG_statistical_file(path_to_drep_RG_dir,cluster_dict,path_to_checkm_result,path_to_mag):
     drep_RG=[]
     drep_RG=os.listdir(path_to_drep_RG_dir)
     if '.ipynb_checkpoints' in drep_RG:
@@ -115,32 +112,30 @@ def make_RG_statistical_file(path_to_drep_RG_dir,cluster_dict):
                 drep_RG.remove(sample)
                 break
     with open('RG_to_cluster.tsv','w') as f:
-        f.write('RG Cluster \n')
+        f.write('RG,Cluster,\n')
         for i in RG_to_cluster:
-            f.write(' '.join(i)+' \n')
+            f.write(','.join(i)+',\n')
 
     text=f'Writting RG\'s statistical file to RG_stat.csv ...\n'
     for words in text:
         sys.stdout.write(words)
         sys.stdout.flush()
-        time.sleep(0.05)
-    if os.system("echo \"completeness contamination strain_heterogeneity N50 contig_number contig_length_sum contig_length_max\" > RG_stat.tsv;\
-                for i in $(cat RG_to_cluster.tsv | cut -d \" \" -f1 | sed -n '2,$p');\
-                do grep $i /hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/flye_test/bins_hmq.metaspades.dastools.gtdbtk.all.tsv \
-                | awk '{print $(NF-11),$(NF-10),$(NF-9),$NF,$(NF-5),$(NF-4),$(NF-2)}';done >> RG_stat.tsv;\
-                paste RG_to_cluster.tsv RG_stat.tsv > RG_stat.csv;\
-                sed -i 's/ /,/g' RG_stat.csv;\
-                rm RG_stat.tsv RG_to_cluster.tsv"):
+        time.sleep(0.01)
+        
+    if os.system('echo "completeness,contamination,strain_heterogeneity" > RG_stat.tsv;sed "s/\t/,/g" %s > checkm;\
+                for i in $(cat RG_to_cluster.tsv | cut -d "," -f1 | sed -n \'2,$p\' | sed "s/.fa//g");\
+                do grep "$i," checkm | cut -d "," -f12-;done >> RG_stat.tsv;\
+                paste -d "" RG_to_cluster.tsv RG_stat.tsv > RG_stat.csv;rm RG_stat.tsv RG_to_cluster.tsv checkm' % path_to_checkm_result):
         print("Writting failed! Please checking your script and running again!")
     else:
         print("Writting finished! Checking RG_stat.csv for more details!")
 
 
-def subcluster_flye_assembling_and_checkm_checking(path_to_drep_RG_dir,cluster_dict):
+def subcluster_flye_assembling_and_checkm_checking(path_to_drep_RG_dir,cluster_dict,path_to_checkm_result,path_to_mag):
     if cluster_dict:
         os.system("mkdir -p ./flye/assemblies/")
         os.system("mkdir -p ./flye/logs/")
-        make_RG_statistical_file(path_to_drep_RG_dir,cluster_dict)
+        make_RG_statistical_file(path_to_drep_RG_dir,cluster_dict,path_to_checkm_result,path_to_mag)
         os.system("mv RG_stat.csv ./flye/")
         with open('./flye/assembly_stat.csv','a') as f:
             f.write("Genome,Total_length,Fragments,N50,Largest_frg,Scaffolds,Mean_coverage\n")
@@ -151,8 +146,8 @@ def subcluster_flye_assembling_and_checkm_checking(path_to_drep_RG_dir,cluster_d
                 f.write("#!/bin/bash\nflye --subassemblies \\\n")
                 for sample in cluster_dict[cluster]:
                     sample_id=sample.split('.')[0]
-                    f.writelines(f'/hwfssz1/ST_META/P18Z10200N0127_MA/zhujie/vagina/vagina_mag/results/06.binning/bins/{sample_id}.metaspades.out/dastools/{sample} \\\n')
-                f.write("--threads 32 \\\n-o ./")
+                    f.writelines(f'{path_to_mag}/{sample} \\\n')
+                f.write("--threads 20 \\\n-o ./")
 
             start=datetime.datetime.now()
             text=f'Assembling cluster {cluster}\'s MAGs using flye ...\n'
@@ -186,7 +181,7 @@ def subcluster_flye_assembling_and_checkm_checking(path_to_drep_RG_dir,cluster_d
                 sys.stdout.write(words)
                 sys.stdout.flush()
                 time.sleep(0.2)
-            if os.system("cd ./flye/assemblies/;checkm lineage_wf --tab_table --file ../checkm_assemblies.tsv -x fasta -t 32 ./ ../checkm_assemblies_output"):
+            if os.system("cd ./flye/assemblies/;checkm lineage_wf --tab_table --file ../checkm_assemblies.tsv -x fasta -t 20 ./ ../checkm_assemblies_output"):
                 print('CheckM processing failed! Checking ./flye/checkm_assemblies_output/checkm.log for more details')
             else:
                 print('CheckM processing finished! Checking ./flye/checkm_assemblies.tsv for results.')
@@ -202,14 +197,41 @@ def subcluster_flye_assembling_and_checkm_checking(path_to_drep_RG_dir,cluster_d
         print("Subcluster assembling process failed! There are no clusters with at least 2 members in the cluster_dict!")
         
 def main():
-    path_to_drep_cluster_table='/hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/candidate_cluster_result16_ani95_drep/data_tables/Cdb.csv'
-    path_to_drep_RG_dir='/hwfssz1/ST_META/P18Z10200N0127_MA/shaoyanhan/metapitest1/candidate_cluster_result16_ani95_drep/dereplicated_genomes/'
+    path_to_drep_cluster_table='/store/yhshao/META/perfect_cluster_result9_ani95_drep/data_tables/Cdb.csv'
+    path_to_drep_RG_dir='/store/yhshao/META/perfect_cluster_result9_ani95_drep/dereplicated_genomes/'
+    path_to_checkm_result='/store/yhshao/META/metapi_result_cami/link_to_mag_vamb_no_graphbin/checkm_output/checkm.tsv'
+    path_to_mag='/store/yhshao/META/metapi_result_cami/link_to_mag_vamb_no_graphbin'
     cluster_dict=get_cluster_dict(path_to_drep_cluster_table)
     pprint.pprint(cluster_dict)
-#     check_subcluster_animf99(cluster_dict)
-    subcluster_flye_assembling_and_checkm_checking(path_to_drep_RG_dir,cluster_dict)
+    check_subcluster_animf99(cluster_dict,path_to_checkm_result,path_to_mag)
+    subcluster_flye_assembling_and_checkm_checking(path_to_drep_RG_dir,cluster_dict,path_to_checkm_result,path_to_mag)
     
 if __name__=='__main__':
     main()
     
-        
+#Example output of this workflow:
+# Removing 0 <one member> clusters
+# Total left 1 clusters
+# {'1_1': ['CAMI_UT_2.metaspades.vamb.bin.2.fa',
+#          'CAMI_UT_22.metaspades.concoct.bin.21.fa']}
+# Processing dRep of cluster 1_1 ...
+# Cluster 1_1 finished dRep process!
+# Cluster 1_1 passed examination!
+# Running time:  0:00:32.611636
+# ----------
+
+# All checking process finished, all clusters passed. Checking all_drep.log for more details.
+# Writting RG's statistical file to RG_stat.csv ...
+# Writting finished! Checking RG_stat.csv for more details!
+# Assembling cluster 1_1's MAGs using flye ...
+# Cluster 1_1's flye subassemblies processing successed!
+# Running time:  0:00:19.440714
+# ----------
+
+# All flye processes finished! Checking ./flye/ or ./flye_temp/(if failed) for assemblies, statistical table and logs.
+# Starting checkm process ...
+# CheckM processing finished! Checking ./flye/checkm_assemblies.tsv for results.
+# Running time:  0:06:32.077641
+# ----------
+
+# All flye and checkm processes finished! Checking ./flye for more details.
