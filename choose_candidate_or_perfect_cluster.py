@@ -162,10 +162,42 @@ if __name__=='__main__':
 
 # ----------
 
+# Candidate cluster: Total 5 results below
 
-# Candidate cluster: Total 0 results below
-
-# {}
+# {'result1': {'RG': 'CAMI_UT_2.metaspades.maxbin2_graphbin_dastools.bin.18.fa',
+#              'dRep': ['CAMI_UT_2.metaspades.maxbin2_graphbin_dastools.bin.18.fa',
+#                       'CAMI_UT_22.metaspades.concoct_graphbin_dastools.bin.36_sub.fa'],
+#              'galah': ['CAMI_UT_2.metaspades.maxbin2_graphbin_dastools.bin.18.fa'],
+#              'same species': ['d__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Secundilactobacillus;s__Secundilactobacillus '
+#                               'paracollinoides']},
+#  'result2': {'RG': 'CAMI_UT_21.metaspades.concoct_graphbin_dastools.bin.2.fa',
+#              'dRep': ['CAMI_UT_0.metaspades.concoct_graphbin_dastools.bin.8_sub.fa',
+#                       'CAMI_UT_2.metaspades.concoct_graphbin_dastools.bin.35_sub.fa',
+#                       'CAMI_UT_21.metaspades.concoct_graphbin_dastools.bin.2.fa',
+#                       'CAMI_UT_3.metaspades.metabat2_graphbin_dastools.bin.15_sub.fa'],
+#              'galah': ['CAMI_UT_21.metaspades.concoct_graphbin_dastools.bin.2.fa'],
+#              'same species': ['d__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactiplantibacillus;s__Lactiplantibacillus '
+#                               'plantarum']},
+#  'result3': {'RG': 'CAMI_UT_22.metaspades.metabat2_graphbin_dastools.bin.10_sub.fa',
+#              'dRep': ['CAMI_UT_22.metaspades.metabat2_graphbin_dastools.bin.10_sub.fa',
+#                       'CAMI_UT_24.metaspades.maxbin2_graphbin_dastools.bin.8_sub.fa'],
+#              'galah': ['CAMI_UT_22.metaspades.metabat2_graphbin_dastools.bin.10_sub.fa'],
+#              'same species': ['d__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lacticaseibacillus;s__Lacticaseibacillus '
+#                               'paracasei']},
+#  'result4': {'RG': 'CAMI_UT_3.metaspades.concoct_graphbin_dastools.bin.16.fa',
+#              'dRep': ['CAMI_UT_25.metaspades.metabat2_graphbin_dastools.bin.18.fa',
+#                       'CAMI_UT_3.metaspades.concoct_graphbin_dastools.bin.16.fa',
+#                       'CAMI_UT_5.metaspades.maxbin2_graphbin_dastools.bin.11_sub.fa'],
+#              'galah': ['CAMI_UT_3.metaspades.concoct_graphbin_dastools.bin.16.fa',
+#                        'CAMI_UT_25.metaspades.metabat2_graphbin_dastools.bin.18.fa'],
+#              'same species': ['d__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Limosilactobacillus;s__Limosilactobacillus '
+#                               'fermentum']},
+#  'result5': {'RG': 'CAMI_UT_22.metaspades.maxbin2_graphbin_dastools.bin.2.fa',
+#              'dRep': ['CAMI_UT_0.metaspades.concoct_graphbin_dastools.bin.26_sub.fa',
+#                       'CAMI_UT_22.metaspades.maxbin2_graphbin_dastools.bin.2.fa'],
+#              'galah': ['CAMI_UT_22.metaspades.maxbin2_graphbin_dastools.bin.2.fa'],
+#              'same species': ['d__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus;s__Lactobacillus '
+#                               'delbrueckii']}}
 
 # ----------
 
