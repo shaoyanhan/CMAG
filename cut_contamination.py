@@ -213,14 +213,20 @@ def main():
     path_to_checkm_ext_file='/store/yhshao/META/metapi_result_cami/checkm_output/storage/bin_stats_ext.tsv'
     path_to_save_the_cutted_mag='/store/yhshao/META/cutted_mag'
     gene_copy_type=['GCN2','GCN3','GCN4','GCN5+']
+    
+    # Using the all_cut_mode carefully, or if you know what are you doing!
+    # Warning1: If the multicopy's E-value is greater than all_cut_threshold given, this kind of multicopy will escape the cutting process!
+    # Warning2: If the domain is not a multicopy but it's E-value is below the all_cut_threshold given, because of the all_cut_mode, you will cut them all,
+    #           which will cause the mis-cut if this domain contain a part of sequence that are from an one-copy gene!
     all_cut_mode=False
     all_cut_threshold='1e-10'
    
+    mag_count=1
     mag_multicopy_info=get_mag_multicopy_info_dict(mag_list,gene_copy_type,path_to_checkm_ext_file,show=True)
     for mag_name in mag_multicopy_info:#'CAMI_UT_6.metaspades.maxbin2.bin.2',...
 
         start=datetime.datetime.now()
-        text=f'\n<<< Starting contamination cutting process with {mag_name} ... >>>\n'
+        text=f'\n<<< Starting contamination cutting process with {mag_name}({mag_count}/{len(mag_list)}) ... >>>\n'
         for words in text:
             sys.stdout.write(words)
             sys.stdout.flush()
@@ -252,16 +258,24 @@ def main():
                         cut_seq_info=append_contig_to_seq_interval_dict(cut_seq_info,hmm_result)
 
         print("\n***Filling process finished!***\n")
+        
+        if cut_seq_info:
+            print("\n***Starting overlap merging process ...***\n")
+            for contig_interval_list in cut_seq_info:#{'NODE_1177_length_6645_cov_37.049635': [[4656, 5495]],...}
+                if len(cut_seq_info[contig_interval_list])>1:
+                    cut_seq_info[contig_interval_list]=merge_overlap(cut_seq_info[contig_interval_list])
+            print("\n***Merging process finished!***\n")
 
-        print("\n***Starting overlap merging process ...***\n")
-        for contig_interval_list in cut_seq_info:#{'NODE_1177_length_6645_cov_37.049635': [[4656, 5495]],...}
-            if len(cut_seq_info[contig_interval_list])>1:
-                cut_seq_info[contig_interval_list]=merge_overlap(cut_seq_info[contig_interval_list])
-        print("\n***Merging process finished!***\n")
-
-        raw_contigs=read_in_mag_file(mag_name,mag_suffix,path_to_mag_folder)
-        cutted_contigs=do_cutting(raw_contigs,cut_seq_info)
-        write_in_cutted_mag(cutted_contigs,mag_name,path_to_save_the_cutted_mag,mag_suffix)
+            raw_contigs=read_in_mag_file(mag_name,mag_suffix,path_to_mag_folder)
+            cutted_contigs=do_cutting(raw_contigs,cut_seq_info)
+            write_in_cutted_mag(cutted_contigs,mag_name,path_to_save_the_cutted_mag,mag_suffix)
+            
+        else:
+        print(f'There are no contaminations in the MAG: {mag_name}.{mag_suffix} !')
+        print(f'Copy MAG to saving_folder: {path_to_save_the_cutted_mag}/{mag_name}.{mag_suffix}\n')
+        if os.system(f'ls {path_to_save_the_cutted_mag}'):
+            os.system(f'mkdir -p {path_to_save_the_cutted_mag}')
+        os.system(f'cp {path_to_mag_folder}/{mag_name}.{mag_suffix} {path_to_save_the_cutted_mag}')
 
         print(f'Contamination cutting with {mag_name} finished!\n')
         end=datetime.datetime.now()
@@ -269,6 +283,8 @@ def main():
         print("Running time: ",running_time)
         print("----------\n")
 
+        mag_count=mag_count+1
+        
     print("All processes finished!")
     
 if __name__=='__main__':
