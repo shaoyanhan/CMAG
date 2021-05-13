@@ -1,3 +1,4 @@
 # CMAG
 The Workflow of Complete Metagenome-Assembled Genome
-![CMAG_Workflow](https://user-images.githubusercontent.com/65232041/118074074-d2c2e900-b3df-11eb-9649-9aec41392f9e.png)
+![未命名文件](https://user-images.githubusercontent.com/65232041/118074584-cee39680-b3e0-11eb-81fb-de67abb7c60a.png)
+
